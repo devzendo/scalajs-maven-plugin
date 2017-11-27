@@ -1,0 +1,289 @@
+Frequently Asked Questions
+
+ (Or things that may be changed/fixed as it moves out of SNAPSHOT status)
+ 
+* General
+
+  * Q. Why is the plugin implementing its own property interpolation?
+  
+  * A. It was easy to implement, I already had similar code. I might change it
+    to use the relevant Maven API for this later.
+
+
+  * Q. I need to pass certain system properties to the JVM, using -Dxxx=yyy.
+       How is this done?
+       
+  * A. Use the \<systemProperties\> section of your configuration - see the answer
+       below.  
+    
+  * Q. I need to set custom VM parameters such as min/max heap size. How is this done?
+  
+  * A. On Windows, some of these can be set in the Janel launcher file - see the
+       Windows-specific section below. Generally, use the \<vmArguments\> section
+       of your configuration, like this:
+  
++----
+      <plugin>
+        <groupId>org.devzendo</groupId>
+        <artifactId>CrossPlatformLauncherPlugin</artifactId>
+        <configuration>
+          <os>Windows</os>
+          <applicationName>BeanMinder</applicationName>
+          <mainClassName>org.devzendo.minimiser.MiniMiser</mainClassName>
+          <systemProperties>
+            <param>myWindowsProperty=foo</param> <!-- like -DmyWindowsProperty=foo -->
+            <param>anotherWindowsProperty=bar</param>
+          </systemProperties>
+          <vmArguments>
+             <param>-Xcheck:jni</param> <!-- passed straight through to the JVM -->
+             <param>-enableassertions</param>
+             <param>-verbose:jni</param>
+          </vmArguments>
+        </configuration>
+        <executions>
+          <execution>
+            <id>createlauncher</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>createlauncher</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
++----
+      
+  
+  * Q. How can I define some launcher properties in a parent pom, and merge them
+    into the platform-specific launcher, along with some platform-specific
+    properties?
+  
+  * A.  Define the common properties in a pluginManagement section in the parent
+    pom, and in the child pom, use the combine.children="append" attribute.
+    
+    See {{{http://docs.codehaus.org/display/MAVENUSER/FAQs-1#FAQs-1-HowdoImergealistofconfigurationitemsinaparentPOMwiththoseinachildPOM%3F}here}} for 
+    details; you must be using Maven 2.0.8 or greater.
+    
+    e.g. parent pom:
+    
++----       
+    <build>
+      <pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.devzendo</groupId>
+            <artifactId>CrossPlatformLauncherPlugin</artifactId>
+            <executions>
+              <execution>
+                <id>createlauncher</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>createlauncher</goal>
+                </goals>
+                <configuration>
+                  <systemProperties>
+                    <param>commonProperty=xyz</param>
+                    <param>anotherCommonProperty=abc</param>
+                  </systemProperties>
+                  <vmArguments>
+                    <param>-Xmx1024</param>
+                  </vmArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </pluginManagement>
+    </build>
++----
+
+    And in the child pom:
+    
++----
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.devzendo</groupId>
+          <artifactId>CrossPlatformLauncherPlugin</artifactId>
+          <configuration>
+            <os>MacOSX</os>
+            <applicationName>BeanMinder</applicationName>
+            <mainClassName>org.devzendo.minimiser.MiniMiser</mainClassName>
+            <iconsFileName>BeanMinder.icns</iconsFileName>
+            <systemProperties combine.children="append">
+              <param>myMacOsXProperty=foo</param>
+              <param>anotherMacOsXProperty=bar</param>
+            </systemProperties>
+            <vmArguments combine.children="append">
+              <param>-Xcheck:jni</param> <!-- debug JNI on Mac OS X -->
+            </vmArguments>
+          </configuration>
+          <executions>
+            <execution>
+              <id>createlauncher</id>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>createlauncher</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        ...
++----
+
+  * Q. How can I add Java Native Interface libraries (.dll on Windows; .so on
+    Linux; .jnilib on Mac OS X) to my project?
+    
+  * A. By far the easiest option is to use the {{{http://duns.github.com/maven-nar-plugin/}Maven NAR Plugin}} to
+    build your native code into NAR (Native ARchive) attached artifacts.
+    
+    Then specify the relevant AOL-classifier:type narClassifier parameters in your
+    pom.xml so that the CrossPlatformLauncherPlugin copies the relevant JNI
+    files into the launcher's library directory appropriately.
+    
+    See the {{{./examples/nar.html}NAR Example}} for a worked example.
+     
+* Windows-specific
+
+  * Q. My application always displays a Command Prompt window before showing
+       its GUI. How can I stop this?
+  
+  * A. The Janel launcher can be used for launching Console apps, and GUIs.
+       You need to choose the correct one. The default is GUI, so presumably
+       you have set it to Console. Place one of these in your configuration:
+       
++----
+          <!-- janelType must be used before v0.2.1 of the plugin -->
+          <janelType>Console</janelType> <!-- or -->
+          <janelType>GUI</janelType>
+          <!-- In v0.2.1, janelType must be changed to launcherType -->
+          <launcherType>Console</launcherType> <!-- or -->
+          <launcherType>GUI</launcherType>
++----
+       
+  * Q. How can I set custom Janel settings?
+  
+  * A. Use the \<janelCustomLines\> array, like this:
+  
++----
+          <janelCustomLines>
+            <param>janel.min.java.version=1.4</param>
+            <param>janel.max.java.version=1.5</param>
+          </janelCustomLines>
++----
+
+  * Q. How can I customise the .exe's icon?
+  
+  * A. You can't, currently. You'd have to build the Janel launcher from its own source,
+       replacing its icon, or use some resource compiler/editor. I might look at
+       munging the binary, if it's an easy replacement.
+         
+* Mac OS X-specific
+
+  * Q. My app doesn't show the correct name in its menu (next to the Apple menu).
+  
+  * A. You need to set the application name, as in this fragment:
+  
++----
+        <configuration>
+          <os>MacOSX</os>
+          <applicationName>BeanMinder</applicationName>
+          <mainClassName>org.devzendo.minimiser.MiniMiser</mainClassName>
+          <iconsFileName>BeanMinder.icns</iconsFileName>
++----
+
+  * Q. How can I add the Quaqua look and feel's native libraries into my launcher?
+  
+  * A. Note that versions 9.1 and 7.3.4 are released to the Central Maven Repository in the org.devzendo group id.
+       The author of Quaqua, Werner Randelshofer does not publish to Central, so DevZendo.org has produced this
+       packaging of it. Note that the 7.3.4 artifacts are called Quaqua and LibQuaqua, whereas 9.1 now adopts the
+       Maven Artifact Naming Convention of quaqua and libquaqua.
+
+       You need to add a dependency on the Java portion of them,
+       (possibly in a profile that's only activated on Mac OS X), and extract the native portion of
+       them into the correct place in your launcher .app directory structure using the Maven dependency plugin:
+
+
++----
+  <dependencies>
+    ...
+    <dependency>
+      <groupId>org.devzendo</groupId>  <!-- Note that this uses DevZendo.org's Maven packaging of Quaqua -->
+      <artifactId>quaqua</artifactId>  <!-- The Java portion -->
+      <version>9.1</version>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <!-- Create the Mac OS X BeanMinder.app launcher structure under 
+           target/macosx. -->
+      ...
+      <!-- Copy the Quaqua native libraries into the correct location in
+           the Mac OS X launcher structure created above. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-dependencies</id>
+            <phase>package</phase>
+            <goals>
+                <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.devzendo</groupId>
+                  <artifactId>libquaqua</artifactId>
+                  <version>9.1</version> <!-- The JNI libraries -->
+                  <type>zip</type>
+                  <overWrite>true</overWrite>
+                  <includes>*</includes>
+                  <outputDirectory>${project.build.directory}/macosx/BeanMinder.app/Contents/Resources/Java/lib</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+              <!-- other configurations here -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Package up the above .app structure into a .tar.gz archive  -->
+      ...
+    </plugins>
+  </build>
+
++----
+
+  * Q. How can I build a command line application, rather than a .app
+       application structure?
+  
+  * A. By default, the plugin will create a .app application structure. To
+       change this to create a structure similar to that used on Linux (to
+       create a script that'll execute your code as a command line program),
+       change the launcher type:
+       
++----
+          <launcherType>Console</launcherType> <!-- or -->
+          <launcherType>GUI</launcherType>
++----
+
+  * Q. My GUI launcher is starting with Apple Java 1.6, and I need Oracle Java 7 or 8 (which I have installed). How
+       can I run in a more modern JVM?
+
+  * A. This is due to the 'JavaApplicationStub' that's in your .app's Contents/MacOS directory. This Maven plugin
+       provides Apple's stub by default, but since this only works with Apple Java 1.6, it also supplies Tobias
+       Fischer's Universal JavaApplicationStub.
+       Please see https://github.com/tofi86/universalJavaApplicationStub for in-depth details, but in your launcher
+       configuration, you need to supply:
+
+
++----
+          <stubType>Universal</stubType>
++----
+
+* Linux specific
+
+  * Nothing of note, as yet.
+  

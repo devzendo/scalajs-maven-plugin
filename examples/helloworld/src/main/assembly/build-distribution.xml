@@ -1,0 +1,17 @@
+<assembly>
+    <id>distribution</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <baseDirectory></baseDirectory>
+
+    <files>
+        <file>
+            <source>src/main/html/index.html</source>
+        </file>
+        <file>
+            <source>${project.build.directory}/helloworld.js</source>
+        </file>
+    </files>
+
+</assembly>

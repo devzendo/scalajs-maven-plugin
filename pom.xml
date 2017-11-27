@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.devzendo</groupId>
+	<artifactId>scalajs-maven-plugin</artifactId>
+	<packaging>maven-plugin</packaging>
+	<name>scalajs-maven-plugin</name>
+	<version>0.0.1-SNAPSHOT</version>
+	<url>http://devzendo.org/dev/scalajs-maven-plugin</url>
+	<description>A Maven plugin that simplifies creation of Scala.JS applications from Maven.
+  	(Apache License v2) 2017 Matt Gumbley, DevZendo.org</description>
+
+    <organization>
+        <name>DevZendo.org</name>
+        <url>http://devzendo.org/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/devzendo/scalajs-maven-plugin</url>
+        <connection>scm:git:https://github.com/devzendo/scalajs-maven-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/devzendo/scalajs-maven-plugin.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>matt.gumbley</id>
+            <name>Matt Gumbley</name>
+            <email>matt.gumbley@devzendo.org</email>
+        </developer>
+    </developers>
+
+    <parent>
+        <groupId>org.devzendo</groupId>
+        <artifactId>group-parent</artifactId>
+        <version>1.1.1</version>
+    </parent>
+
+    <!-- this is fixed at java 7, does not compile under java 8 (annotations) - must be built with a 1.7 JDK -->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-project</artifactId>
+            <version>2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>1.5.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.skins</groupId>
+            <artifactId>maven-default-skin</artifactId>
+            <version>1.2</version>
+        </dependency>
+    </dependencies>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>2.9</version>
+			</plugin>
+		</plugins>
+	</reporting>
+</project>

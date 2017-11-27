@@ -1,0 +1,5 @@
+# scalajs-maven-plugin Change history
+
+v0.0.1 __/__/2017 first release
+  * Mostly tested on Mac OS X, but should work on Windows and Linux.
+

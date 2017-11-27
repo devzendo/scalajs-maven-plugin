@@ -1,0 +1,37 @@
+Using the Cross Platform Launcher Plugin
+
+  The ideal module structure for your project would have several modules:
+
+    * a parent module to define overall build/plugin settings
+
+    * your main application code in one module (e.g. my-app-code)
+
+    * any platform-specific code (e.g. OS-specific menu/look & feel initialisation) in separate modules per OS
+      (e.g. my-app-windows, my-app-macosx, my-app-kde, my-app-gnome)
+
+    * a launcher module for each platform - note that this plugin builds the launcher structure to contain a module's
+      dependencies, and not any code that is produced in that module, so it is advised to separate the platform-specific
+      code (see previous section) into a module on its own, and have a parallel launcher module per platform
+      (e.g. my-app-windows-launcher, my-app-macosx-launcher, my-app-kde-launcher, my-app-gnome-launcher)
+
+    * you may then add platform-specific packaging to these launcher modules (.msi, .dmg, .deb/.rpm as appropriate)
+
+  To use the Cross Platform Launcher Plugin in Maven 2, you simply need to:
+
+    * provide platform-specific files in your src/main/resources directory, e.g.
+      a .icns icon file for Mac OS X.
+    
+    * configure the Plugin in your project's pom.xml. See
+      {{{./examples/index.html}the index of examples}} for examples of this.
+      
+    * optionally configure an archive stage using the Maven Assembly Plugin,
+      using a platform-specific assembly descriptor provided by this plugin
+
+    * run "mvn package" on your project.
+
+    * the resulting launcher directory structure is created under the
+      target/macosx, target/windows or target/linux directory
+      
+    * if you added the archive stage, the archive of the launcher structure
+      (.zip on Windows; .tar.gz on Mac OS X and Linux) is created in your
+      target directory.

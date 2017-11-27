@@ -1,0 +1,137 @@
+  ---
+  Introduction
+  ---
+  Matt Gumbley, DevZendo.org
+  ---
+  21 September 2017
+  ---
+
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~   http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+~~ NOTE: For help with the syntax of this file, see:
+~~ http://maven.apache.org/doxia/references/apt-format.html
+
+Cross Platform Launcher Plugin
+
+* Status
+
+  Current Plugin Version is: 1.1.0
+
+* Introduction
+
+  This plugin creates single-click/run launch 'apps', executables or scripts
+  that bundle all a program's code, libraries and resources into an easily-distributable
+  single directory.
+
+  In order to run a Java application, the JVM must be loaded with the correct
+  configuration, namely, the main class, the classpath libraries, any system
+  properties and VM arguments.
+  
+  The platforms supported by this plugin (Mac OS X, Windows and Linux) offer different mechanisms
+  for achieving this. This plugin integrates these mechanisms, to allow launchers to
+  be generated for all three platforms given some common configuration and
+  some platform-specific configuration. 
+
+  The plugin also supports the use of JNI code built using
+  the {{{http://duns.github.com/maven-nar-plugin/}Maven NAR Plugin}}.
+  
+** Mac OS X
+  
+  The plugin can create .app structures, and script launchers (like Linux).
+  
+  For .app structures: A directory structure is created, given the name \<Application\>.app,
+  with 'application stub', code, libraries, configuration and icon in the correct place.
+  Apple provide a tool to assist with this, but it's not easily invokable from Maven. There
+  are other plugins that can achieve the same ends. See
+  {{{http://mojo.codehaus.org/osxappbundle-maven-plugin/}OSX App Bundle}} for one such plugin.
+  
+  For script launchers, a directory structure is created with 'bin' and 'lib'
+  directories, containing the launcher script, and dependent libraries,
+  respectively.
+  
+  On Mac OS X, a popular addition to Java projects is the Quaqua look and feel
+  library. See {{{http://www.randelshofer.ch/quaqua/}the Quaqua home page}} for details.
+  Using this requires the addition of native libraries. The Maven
+  dependency plugin can be used to extract these libraries from your local
+  Maven repository into the correct location in your .app launcher structure.
+
+  See {{{./examples/macosx.html}Mac OSX Examples}} to see how to achieve this.
+
+  The older Apple Java 1.6 system provided an 'application stub' which must be present in your
+  .app structure. This is invoked when you launch your program from its icon. This only worked
+  in 1.6, and for later versions of Oracle Java, an alternative 'universal' application stub
+  (developed by Tobias Fischer) is provided. This plugin contains both the Apple stub, and
+  the Universal one, switchable via plugin configuration.
+
+** Windows
+
+  The JVM must be loaded by some process. It is possible to do this
+  from a .cmd file, but running the .cmd file leaves an unsightly command
+  prompt window on screen. The Janel open source launcher can alleviate this.
+  See {{{http://www.redskaper.com}the Janel home page}} for details of Janel.
+  This plugin contains the Janel console and windows .EXE files, and will copy
+  the relevant one into your launcher structure.
+
+** Linux  
+  
+  The JVM can be invoked from a shell script.
+
+* Launcher archiving
+  
+  This plugin can generate launcher structures for each platform under the
+  project's build (target) directory. 
+
+  The Maven assembly plugin can then be used to package the resulting launchers
+  into archives suitable for shipment. Assembly descriptors are provided in this
+  plugin for simple archive creation:
+  
+    * Windows: windows-launcher-distribution.xml
+    
+    * Linux: linux-launcher-distribution.xml
+    
+    * Mac OS X: macosx-launcher-distribution.xml 
+
+* Installers, Disk Images, Package Manager Archives
+
+  It's likely that you will need to perform further processing on your launcher
+  archives: On Windows, the launcher is typically built into an installer; On
+  Mac OS X, the launcher is typically shipped on a disk image (.dmg); On Linux,
+  the launcher is typically packaged into a .deb or .rpm archive. This plugin
+  does not perform any of these functions (yet).   
+      
+* Goals
+
+  For more information about the goals that are available in the plugin, see
+  {{{plugin-info.html}the goals page}}.
+
+* Contact us
+
+  The project's home page is at: {{{https://devzendo.github.io/dev/xplp/}DevZendo.org Cross Platform Launcher Plugin}}.
+  
+* Examples
+
+  See {{{./examples/index.html}the index of examples}}.
+
+* Acknowledgements
+
+    * Tobias Fischer's Universal Application Stub is provided by this plugin (v2.1.0). This stub is licensed under
+      the MIT License. Please see {{{https://github.com/tofi86/universalJavaApplicationStub}Tobias' Github repo}} for
+      more details.
+
+    * The Redskaper Janel launcher is provided by this plugin. Please see {{{http://www.redskaper.com/}their project page}}
+      for more details.
